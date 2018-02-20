@@ -63,8 +63,8 @@ class Send_Email():
                     message = []
                     message.append(
                         'We have identified that your web address is undergoing an IP DoS attack {}.'.format(ips))
-                    #  BLOQUEAR_ATAQUES --> BLOCK_TAQUES
-                    if settings.BLOQUEAR_ATAQUES:
+                    # BLOCK_ATTACKS
+                    if settings.BLOCK_ATTACKS:
                         message.append(
                             '\n\nIP was blocked following the iptables rule \"{}\".'.format(settings.IPTABLES))
                     message.append(
@@ -78,7 +78,7 @@ class Send_Email():
                         'We have identified that your web address is suffering a DDoS attack from IPs:\n')
                     for ip in ips:
                         message.append('\n>> {}'.format(ip))
-                    if settings.BLOQUEAR_ATAQUES:
+                    if settings.BLOCK_ATTACKS:
                         message.append(
                             '\n\nOs IPs were blocked following the iptables rule \"{}\".'.format(settings.IPTABLES))
                     message.append(
