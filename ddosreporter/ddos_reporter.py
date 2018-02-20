@@ -51,41 +51,41 @@ class Ddos_reporter():
 
         while True:
             with open(settings.ARQUIVO_DE_LOG, 'r') as _file:
-                #Posicionando para ler a partir do byte anterior
+                #Positioning to read from the previous byte
                 _file.seek(fileBytePos)
 
-                #Lendo novos registros do log, separando por '\n'
+                #Reading new log records, separating by '\n'
                 data = _file.read()
                 # data = data.split('\n')
 
-                #Capturando somente o(s) IP(s) de cada cliente
+                #Capturing only the IP(s) of each client
                 access_list = re.findall(regex, data)
 
-                #Verifica se house um estouro no limite de requisições
-                #possíveis por segundo
+                #Checks house for overflow on request
+                # possible per second
                 if len(set(access_list)) > settings.LIMITE_REQUISICOES_TOTAL:
                     ips = []
                     for ip in set(access_list):
                         ips.append(ip)
                     ips = ', '.join(ips)
-                    print '\033[1;31mATENÇÃO\033[0m - Estouro do limite de {} requisições por segundo (Ataque DDoS)\nIPs:'.format(
+                    print '\033[1;31mATTENTION\033[0m - Limit overflow of {} requests per second (DDoS attack) \ nIPs:'.format(
                         settings.LIMITE_REQUISICOES_TOTAL), ips
 
-                #Contando numero de requisições para cada IP
+                #Counting number of requests for each IP
                 ipcounter = []
                 for ip in set(access_list):
                     total = access_list.count(ip)
                     if total > settings.LIMITE_REQUISICOES_POR_IP:
                         if args.verbose:
-                            print ip, '- Total:', total, '\033[0;31m(Ataque detectado)\033[0m'
+                            print ip, '- Total:', total, '\033[0;31m(Attack detected)\033[0m'
                         ipcounter.append(ip)
                     else:
                         if args.verbose:
                             print ip, '- Total:', total
 
-                #Define tipo de ataque
+                #Defines type of attack
                 if len(ipcounter) > 0:
-                    #Ataque DDoS---------------------------
+                    #DDoS Attack---------------------------
                     if len(ipcounter) > 1:
                         ips = []
                         for ip in set(ipcounter):
@@ -93,46 +93,46 @@ class Ddos_reporter():
                         ips = ', '.join(ips)
                         if settings.BLOQUEAR_ATAQUES:
                             if ultimoDDoS != ips:
-                                print '\033[1;31mAlerta de ataque DDoS\033[0m - \033[1;32mIPs:', ips, '\033[0m'
+                                print '\033[1;31mAlert of DDoS Attack\033[0m - \033[1;32mIPs:', ips, '\033[0m'
                         else:
-                            print '\033[1;31mAlerta de ataque DDoS\033[0m - \033[1;32mIPs:', ips, '\033[0m'
+                            print '\033[1;31mAlert of DDoS Attack\033[0m - \033[1;32mIPs:', ips, '\033[0m'
                         ultimoDDoS = ips
 
-                        #Bloqueando Ataque
+                        #Blocking attack
                         if settings.BLOQUEAR_ATAQUES:
                             for ip in ipcounter:
                                 if not (ip in ipsBloqueados):
                                     if os.system(re.sub(r'<ip>', ip, settings.IPTABLES)) == 0:
-                                        ipsBloqueados[ip] = 'Bloqueando'
-                                        print 'IP {} bloqueado'.format(ip)
-                                        Process(target=fw.logAppend, args=('IP {} bloqueado\n'.format(ip), )).start()
+                                        ipsBloqueados[ip] = 'Blocking'
+                                        print 'IP {} blocking'.format(ip)
+                                        Process(target=fw.logAppend, args=('IP {} blocking\n'.format(ip), )).start()
 
-                        #Enviando Email
+                        #Sending Email
                         if settings.SEND_EMAIL:
-                            print 'Enviando email para o(s) SYSADM(s)...'
+                            print 'Sending email to SYSADM(s)...'
                             if len(settings.SYSADM) == 0:
-                                print 'Nenhum email de SYSADM cadastrado'
+                                print 'No registered SYSADM emails'
                             else:
                                 for email in settings.SYSADM:
                                     Process(target=email_sender.send_email, args=(email, ipcounter, 1)).start()
                     else:
-                        #Ataque DoS------------------------
+                        #DoS Attack------------------------
                         if settings.BLOQUEAR_ATAQUES:
                             if ultimoDoS != ipcounter[0]:
-                                print '\033[1;31mAlerta de ataque DoS\033[0m - \033[1;32mIP:', ipcounter[0], '\033[0m'
+                                print '\033[1;31mAlert of DoS attack\033[0m - \033[1;32mIP:', ipcounter[0], '\033[0m'
                         else:
-                            print '\033[1;31mAlerta de ataque DoS\033[0m - \033[1;32mIP:', ipcounter[0], '\033[0m'
+                            print '\033[1;31mAlert of DoS attack\033[0m - \033[1;32mIP:', ipcounter[0], '\033[0m'
                         ultimoDoS = ipcounter[0]
 
-                        #Bloqueando Ataque
+                        #Blocking attack
                         if settings.BLOQUEAR_ATAQUES:
                             if not (ipcounter[0] in ipsBloqueados):
                                 if os.system(re.sub(r'<ip>', ipcounter[0], settings.IPTABLES)) == 0:
-                                    ipsBloqueados[ipcounter[0]] = 'Bloqueando'
-                                    print 'IP {} bloqueado'.format(ipcounter[0])
-                                    Process(target=fw.logAppend, args=('IP {} bloqueado\n'.format(ipcounter[0]), )).start()
+                                    ipsBloqueados[ipcounter[0]] = 'Blocking'
+                                    print 'IP {} blocking'.format(ipcounter[0])
+                                    Process(target=fw.logAppend, args=('IP {} blocking\n'.format(ipcounter[0]), )).start()
 
-                        #Enviando Email
+                        #Sending Email
                         if settings.SEND_EMAIL:
                             print 'Sending email(s) to SYSADM(s)...'
                             if len(settings.SYSADM) == 0:
