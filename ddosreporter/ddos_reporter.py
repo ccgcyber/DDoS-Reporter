@@ -50,7 +50,7 @@ class Ddos_reporter():
         regex = re.compile(r'(.+?) .+?\n')
 
         while True:
-            with open(settings.ARQUIVO_DE_LOG, 'r') as _file:
+            with open(settings.LOG_ARCHIVE, 'r') as _file:
                 #Positioning to read from the previous byte
                 _file.seek(fileBytePos)
 
@@ -63,19 +63,19 @@ class Ddos_reporter():
 
                 #Checks house for overflow on request
                 # possible per second
-                if len(set(access_list)) > settings.LIMITE_REQUISICOES_TOTAL:
+                if len(set(access_list)) > settings.REQUIREMENT_LIMIT_TOTAL:
                     ips = []
                     for ip in set(access_list):
                         ips.append(ip)
                     ips = ', '.join(ips)
                     print '\033[1;31mATTENTION\033[0m - Limit overflow of {} requests per second (DDoS attack) \ nIPs:'.format(
-                        settings.LIMITE_REQUISICOES_TOTAL), ips
+                        settings.REQUIREMENT_LIMIT_TOTAL), ips
 
                 #Counting number of requests for each IP
                 ipcounter = []
                 for ip in set(access_list):
                     total = access_list.count(ip)
-                    if total > settings.LIMITE_REQUISICOES_POR_IP:
+                    if total > settings.REQUIREMENT_LIMIT_FOR_IP:
                         if args.verbose:
                             print ip, '- Total:', total, '\033[0;31m(Attack detected)\033[0m'
                         ipcounter.append(ip)
@@ -91,7 +91,7 @@ class Ddos_reporter():
                         for ip in set(ipcounter):
                             ips.append(ip)
                         ips = ', '.join(ips)
-                        if settings.BLOQUEAR_ATAQUES:
+                        if settings.BLOCK_ATTACKS:
                             if ultimoDDoS != ips:
                                 print '\033[1;31mAlert of DDoS Attack\033[0m - \033[1;32mIPs:', ips, '\033[0m'
                         else:
@@ -99,7 +99,7 @@ class Ddos_reporter():
                         ultimoDDoS = ips
 
                         #Blocking attack
-                        if settings.BLOQUEAR_ATAQUES:
+                        if settings.BLOCK_ATTACKS:
                             for ip in ipcounter:
                                 if not (ip in ipsBloqueados):
                                     if os.system(re.sub(r'<ip>', ip, settings.IPTABLES)) == 0:
@@ -117,7 +117,7 @@ class Ddos_reporter():
                                     Process(target=email_sender.send_email, args=(email, ipcounter, 1)).start()
                     else:
                         #DoS Attack------------------------
-                        if settings.BLOQUEAR_ATAQUES:
+                        if settings.BLOCK_ATTACKS:
                             if ultimoDoS != ipcounter[0]:
                                 print '\033[1;31mAlert of DoS attack\033[0m - \033[1;32mIP:', ipcounter[0], '\033[0m'
                         else:
@@ -125,7 +125,7 @@ class Ddos_reporter():
                         ultimoDoS = ipcounter[0]
 
                         #Blocking attack
-                        if settings.BLOQUEAR_ATAQUES:
+                        if settings.BLOCK_ATTACKS:
                             if not (ipcounter[0] in ipsBloqueados):
                                 if os.system(re.sub(r'<ip>', ipcounter[0], settings.IPTABLES)) == 0:
                                     ipsBloqueados[ipcounter[0]] = 'Blocking'
@@ -150,7 +150,7 @@ class Ddos_reporter():
 
                 #Delay of x second (s) until next reading
                 try:
-                    time.sleep(settings.INTERVALO_TEMPO)
+                    time.sleep(settings.TIME_INTERVAL)
                 except KeyboardInterrupt:
                     print '\nMonitoring completed\n'
                     exit()
@@ -171,7 +171,7 @@ class Ddos_reporter():
         print '\033[0;36m Demand limit for a single IP:\033[0;33m', settings.LIMITE_REQUISICOES_POR_IP
         print '\033[0;36m Limit of different requests to the server:\033[0;33m', settings.LIMITE_REQUISICOES_TOTAL
         print '\033[0;36m Block attacks:\033[0;33m', settings.BLOQUEAR_ATAQUES
-        if settings.BLOQUEAR_ATAQUES:
+        if settings.BLOCK_ATTACKS:
             print '\033[0;36m Rule iptables:\033[0;33m', settings.IPTABLES
         print '\033[0m'
 
