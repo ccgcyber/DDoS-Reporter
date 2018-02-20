@@ -19,37 +19,34 @@ from multiprocessing import Process
 
 class Ddos_reporter():
     '''
-    Monitor DoS and DDoS based on data from the access log of the web server
-    Apache.\n
-    It counts the number of requests and then it can block the IPs or only
-    send alerts.
+    Monitor DoS and DDoS based on data from the access log of the web server Apache.\n
+    It counts the number of requests and then it can block the IPs or only send alerts.
     '''
 
     def start_monitoring(self):
         '''
         Starts monitoring by capturing data from the log access
         '''
-        print '\nMonitorando...'
+        print '\nMonitoring...'
 
-        #Capturando tamanho do arquivo para ler a partir do próximo bloco de
-        #bytes
+        #Capturing file size to read from next block of bytes
         fileBytePos = os.path.getsize(settings.ARQUIVO_DE_LOG)
 
-        #Objeto que enviará emails caso haja um ataque
+        #Object that will send emails in case of an attack
         email_sender = send_email.Send_Email()
 
-        #Objeto que atualiza o arquivo de log do ddosreporter
+        #Object that updates the ddosreporter log file
         fw = file_writer.File_writer()
 
-        #Dicionário de bloqueados (Somente na execução atual do programa, não
-        #contém registros anteriores)
+        #Blocked Dictionary (Only in the current program execution, no
+        #contains previous records)
         ipsBloqueados = {}
 
-        #Ultimos ataques sofridos
+        #Last attacks suffered
         ultimoDoS = ''
         ultimoDDoS = ''
 
-        #Expressão regular
+        #Regular expression
         regex = re.compile(r'(.+?) .+?\n')
 
         while True:
@@ -137,45 +134,45 @@ class Ddos_reporter():
 
                         #Enviando Email
                         if settings.SEND_EMAIL:
-                            print 'Enviando email para o(s) SYSADM(s)...'
+                            print 'Sending email(s) to SYSADM(s)...'
                             if len(settings.SYSADM) == 0:
-                                print 'Nenhum email de SYSADM cadastrado'
+                                print 'No registered SYSADM emails'
                             else:
                                 for email in settings.SYSADM:
                                     Process(target=email_sender.send_email, args=(email, ipcounter[0], 0)).start()
 
-                #Saltar uma linha
+                #Skip a line
                 if data != '' and args.verbose:
                     print ''
 
-                #Tamanho atual do arquivo
+                #Current file size
                 fileBytePos = _file.tell()
 
-                #Delay de x segundo(s) até a próxima leitura
+                #Delay of x second (s) until next reading
                 try:
                     time.sleep(settings.INTERVALO_TEMPO)
                 except KeyboardInterrupt:
-                    print '\nMonitoramento finalizado\n'
+                    print '\nMonitoring completed\n'
                     exit()
 
     def print_settings(self):
         '''
         Prints the actual configuration of DDoSReporter
         '''
-        print '\n\033[1;31m ATENÇÃO - EXECUTE COMO SUPERUSUÁRIO (ROOT)\033[0;33m\n'
-        print '\033[0;36m Versão:\033[0;33m', get_version()
-        print '\033[0;36m Arquivo de log:\033[0;33m', settings.ARQUIVO_DE_LOG
+        print '\n\033[1;31m ATTENTION - EXECUTE AS A SUPERUSUARY (ROOT)\033[0;33m\n'
+        print '\033[0;36m Version:\033[0;33m', get_version()
+        print '\033[0;36m Log file:\033[0;33m', settings.ARQUIVO_DE_LOG
         sysadms = []
         for email in settings.SYSADM:
             sysadms.append(email)
         sysadms = ', '.join(sysadms)
         print '\033[0;36m SYSADMs:\033[0;33m', sysadms
-        print '\033[0;36m Enviar emails de alerta:\033[0;33m', settings.SEND_EMAIL
-        print '\033[0;36m Limite de requisições para um único IP:\033[0;33m', settings.LIMITE_REQUISICOES_POR_IP
-        print '\033[0;36m Limite de requisições distintas para o servidor:\033[0;33m', settings.LIMITE_REQUISICOES_TOTAL
-        print '\033[0;36m Bloquear ataques:\033[0;33m', settings.BLOQUEAR_ATAQUES
+        print '\033[0;36m Send alert emails:\033[0;33m', settings.SEND_EMAIL
+        print '\033[0;36m Demand limit for a single IP:\033[0;33m', settings.LIMITE_REQUISICOES_POR_IP
+        print '\033[0;36m Limit of different requests to the server:\033[0;33m', settings.LIMITE_REQUISICOES_TOTAL
+        print '\033[0;36m Block attacks:\033[0;33m', settings.BLOQUEAR_ATAQUES
         if settings.BLOQUEAR_ATAQUES:
-            print '\033[0;36m Regra iptables:\033[0;33m', settings.IPTABLES
+            print '\033[0;36m Rule iptables:\033[0;33m', settings.IPTABLES
         print '\033[0m'
 
 if __name__ == "__main__":
