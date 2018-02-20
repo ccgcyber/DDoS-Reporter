@@ -20,8 +20,8 @@ Those files are located inside the <i>ddosreporter</i> folder
 
 ## Screenshots
 
-![ft1](https://raw.github.com/mtsferreirasilva/DDoS-Reporter/master/samples/imagens/ft1.png)
-![ft2](https://raw.github.com/mtsferreirasilva/DDoS-Reporter/master/samples/imagens/ft2.png)
-![ft3](https://raw.github.com/mtsferreirasilva/DDoS-Reporter/master/samples/imagens/ft3.png)
-![ft4](https://raw.github.com/mtsferreirasilva/DDoS-Reporter/master/samples/imagens/ft4.png)
-![ft5](https://raw.github.com/mtsferreirasilva/DDoS-Reporter/master/samples/imagens/ft5.png)
+![ft1](https://github.com/ccgcyber/DDoS-Reporter/blob/master/samples/imagens/ft1.png)
+![ft2](https://github.com/ccgcyber/DDoS-Reporter/blob/master/samples/imagens/ft2.png)
+![ft3](https://github.com/ccgcyber/DDoS-Reporter/blob/master/samples/imagens/ft3.png)
+![ft4](https://github.com/ccgcyber/DDoS-Reporter/blob/master/samples/imagens/ft4.png)
+![ft5](https://github.com/ccgcyber/DDoS-Reporter/blob/master/samples/imagens/ft5.png)
