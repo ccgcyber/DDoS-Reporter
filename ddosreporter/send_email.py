@@ -28,7 +28,7 @@ class Send_Email():
         Returns 1 for valid email and 0 for invalid
         '''
 
-        #Verifica integridade do email
+        #Check email integrity
         if re.match('^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$', email) is not None:
             return 1
         return 0
@@ -43,49 +43,50 @@ class Send_Email():
             atk (int) - Type of attack detected (0->DoS, 1->DDoS)
         '''
 
-        #Verifica email do SYSADM
+        #Checks SYSADM email
         if not self.email_validator(email):
-            print email, '- Email inválido'
-        #Verifica email do servidor e se existe um SYSADM cadastrado
+            print email, '- Invalid Email'
+        #Checks mail from server and if a SYSADM exists
         elif len(settings.EMAIL_PASSWORD) == 2 and len(settings.SYSADM) > 0:
             if not self.email_validator(settings.EMAIL_PASSWORD[0]):
                 print email, '- Email inválido'
             else:
-                #Cabeçalho do email
+                #Email Header
                 msg = MIMEMultipart()
                 msg['From'] = settings.EMAIL_PASSWORD[0]
                 msg['To'] = email
                 msg['Date'] = formatdate(localtime=True)
 
-                #Mensagem do email
+                #Email Message
                 if atk == 0:
-                    msg['Subject'] = 'Alerta de DoS'
+                    msg['Subject'] = 'DoS Alert'
                     message = []
                     message.append(
-                        'Identificamos que seu endereço web está sofrendo um ataque DoS do IP {}.'.format(ips))
+                        'We have identified that your web address is undergoing an IP DoS attack {}.'.format(ips))
+                    #  BLOQUEAR_ATAQUES --> BLOCK_TAQUES
                     if settings.BLOQUEAR_ATAQUES:
                         message.append(
-                            '\n\nO IP foi bloquado seguindo a regra de iptables \"{}\".'.format(settings.IPTABLES))
+                            '\n\nIP was blocked following the iptables rule \"{}\".'.format(settings.IPTABLES))
                     message.append(
-                        '\n\n\tEsta mensagem foi gerada automaticamente pelo sistema, não responda este e-mail.')
+                        '\n\n\tThis message was generated automatically by the system, do not reply to this email.')
                     message = ''.join(message)
                     msg.attach(MIMEText(message))
                 elif atk == 1:
-                    msg['Subject'] = 'Alerta de DDoS'
+                    msg['Subject'] = 'DDoS Alert'
                     message = []
                     message.append(
-                        'Identificamos que seu endereço web está sofrendo um ataque DDoS dos IPs:\n')
+                        'We have identified that your web address is suffering a DDoS attack from IPs:\n')
                     for ip in ips:
                         message.append('\n>> {}'.format(ip))
                     if settings.BLOQUEAR_ATAQUES:
                         message.append(
-                            '\n\nOs IPs foram bloquados seguindo a regra de iptables \"{}\".'.format(settings.IPTABLES))
+                            '\n\nOs IPs were blocked following the iptables rule \"{}\".'.format(settings.IPTABLES))
                     message.append(
-                        '\n\n\tEsta mensagem foi gerada automaticamente pelo sistema, não responda este e-mail.')
+                        '\n\n\tThis message was generated automatically by the system, do not reply to this email.')
                     message = ''.join(message)
                     msg.attach(MIMEText(message))
 
-                #Enviando email
+                #Sending emails
                 try:
                     server = smtplib.SMTP('smtp.gmail.com', 587)
                     server.ehlo()
@@ -101,28 +102,28 @@ class Send_Email():
                             ipEnviar.append(ip)
                         ipEnviar = ', '.join(ipEnviar)
 
-                    print 'Email enviado para {} sobre o ataque dos IPs: {}'.format(email, ipEnviar)
+                    print 'Email sent to {} about IP attack: {}'.format(email, ipEnviar)
                 except SMTPServerDisconnected:
-                    sys.stderr.write('ERRO: Falha ao enviar email. Servidor desconectado.')
+                    sys.stderr.write('ERROR: Failed to send email. Server disconnected.')
                 except SMTPRecipientsRefused:
-                    sys.stderr.write('ERRO: Falha ao enviar email. Destinatários recusados.')
+                    sys.stderr.write('ERROR: Failed to send email. Refused recipients.')
                 except SMTPResponseException:
-                    sys.stderr.write('ERRO: Falha ao enviar email. Falha durante o recebimento de resposta.')
+                    sys.stderr.write('ERROR: Failed to send email. Failed to receive response.')
                 except SMTPAuthenticationError:
-                    sys.stderr.write('ERRO: Falha ao enviar email. Falha com a autentificação do email.')
+                    sys.stderr.write('ERROR: Failed to send email. Email authentication failed.')
                 except SMTPConnectError:
-                    sys.stderr.write('ERRO: Falha ao enviar email. Falha ao se conectar com o servidor.')
+                    sys.stderr.write('ERROR: Failed to send email. Failed to connect to server.')
                 except SMTPDataError:
-                    sys.stderr.write('ERRO: Falha ao enviar email. Servidor recusou a mensagem enviada.')
+                    sys.stderr.write('ERROR: Failed to send email. Server refused the sent message.')
                 except SMTPHeloError:
-                    sys.stderr.write('ERRO: Falha ao enviar email. Servidor recusou mensagem de HELO')
+                    sys.stderr.write('ERROR: Failed to send email. Server refused HELO message')
                 except SMTPSenderRefused:
-                    sys.stderr.write('ERRO: Falha ao enviar email. Falha com endereço de origem')
+                    sys.stderr.write('ERROR: Failed to send email. Source address failure')
                 except SMTPException:
-                    sys.stderr.write('ERRO: Falha ao enviar email.')
+                    sys.stderr.write('ERROR: Failed to send email.')
                 finally:
                     server.close()
         elif len(settings.EMAIL_PASSWORD) == 0:
-            sys.stderr.write('ERRO: Email para enviar os alertas ainda não foi configurado. Verifique o arquivo settings.py')
+            sys.stderr.write('ERROR: Email to send the alerts has not yet been configured. Check the settings.py file')
         else:
-            sys.stderr.write('ERRO: Falha nas variáveis de email informadas. Verifique o arquivo settings.py.')
+            sys.stderr.write('ERROR: Failed email variables reported. Check the settings.py file.')
