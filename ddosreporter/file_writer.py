@@ -41,4 +41,4 @@ class File_writer():
             f.write('{}/{}/{} {}:{}:{} - {}'.format(
                 day, month, year, hour, minute, second, data))
 
-        os.chmod('ddosreporter.log', 0644)  # permisões para o arquivo de log
+        os.chmod('ddosreporter.log', 0644)  # permissions to the log file
